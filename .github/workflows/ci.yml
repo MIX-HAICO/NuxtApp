@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches:
+    branches-ignore:
       - main
       - dev
   pull_request:
@@ -11,49 +11,6 @@ on:
       - dev
 
 jobs:
-  commitlint:
-    runs-on: ubuntu-22.04
-    container: 
-      image: docker.io/homebrew/ubuntu22.04
-      options: --user root
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: Install required dependencies
-        run: |
-          apt update
-          apt install -y sudo
-          sudo apt install -y git curl
-          curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
-          sudo DEBIAN_FRONTEND=noninteractive apt install -y nodejs
-          git config --global --add safe.directory '*'
-      - name: Print versions
-        run: |
-          git --version
-          node --version
-          npm --version
-          npx commitlint --version
-      - name: Install commitlint
-        run: |
-          npm install conventional-changelog-conventionalcommits
-          npm install commitlint@latest
-
-      - name: Validate current commit (last commit) with commitlint
-        if: github.event_name == 'push'
-        run: |
-          echo 'Testing commintlint'
-          npm install
-          npm run postinstall
-          npx commitlint --from HEAD~1 --to HEAD --verbose
-
-      - name: Validate PR commits with commitlint
-        if: github.event_name == 'pull_request'
-        run: |
-          echo 'Testing commintlint'
-          npm install
-          npm run postinstall
-          npx commitlint --from ${{ github.event.pull_request.head.sha }}~${{ github.event.pull_request.commits }} --to ${{ github.event.pull_request.head.sha }} --verbose
 
   ci:
     runs-on: ${{ matrix.os }}
@@ -94,3 +51,9 @@ jobs:
 
       - name: Run tests 🧪
         run: yarn test
+
+      - name: Validate PR commits with commitlint
+        if: github.event_name == 'pull_request'
+        run: |
+          yarn postinstall
+          npx commitlint --from ${{ github.event.pull_request.head.sha }}~${{ github.event.pull_request.commits }} --to ${{ github.event.pull_request.head.sha }} --verbose
