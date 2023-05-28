@@ -14,4 +14,15 @@ export default defineNuxtConfig({
   postcss: {},
   vite: {},
   webpack: {},
+  routeRules: {},
+  typescript: {
+    strict: true,
+  },
+  components: [
+    {
+      path: '~/components',
+      extensions: ['.vue'], // Only the files with extensions is .vue to components
+      pathPrefix: false, // Not using path to name components
+    },
+  ],
 })
